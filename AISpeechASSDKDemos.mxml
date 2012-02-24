@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	This is a demo project using AISpeech API ASSDK
+	Refer to the online tutorial: 
+	https://menrfa.wordpress.com/2012/02/24/aispeech-api-asdk-tutoriala-spoken-english-assessment-application/
+
+	AI Speech Ltd
+
+	@author ping.zou 
+	@date 24 Feb 2012
+-->
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600"
+			   creationComplete="init();">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.aispeech.RecorderLib;
+			import com.aispeech.events.CoreRequesterEvent;
+			
+			import mx.collections.ArrayCollection;
+			
+			private static const RECORDERLIB_PARAMS:Object = {
+				appKey:"your app ID",
+				secretKey:"you secret key",
+				serverList:["rtmp://demo.aispeech.com:443/v2.0/aistream"]  // release 2.0
+			};
+			
+			private var _coreRequesterParams:Object = {
+				refText:"past", // this to be updated for each core request 
+				scoreType:100,  // ask score in grade 100
+				rank:100,
+				coreType:"en.sent.score",  // request the English-Senetence core
+				userId:"xxxxxx",               
+				applicationId:"your application ID"  // application ID again
+			};
+			
+			private var _recorderLib:RecorderLib; // the recorder.
+			
+			// parsed score results to show in the result chart
+			// each item is like {Word: 'I', Score: '80'}
+			[Bindable] private var _scores:ArrayCollection = new ArrayCollection();
+			
+			private function init():void
+			{
+				// init RecorderLib instance
+				_recorderLib = new RecorderLib();
+				_recorderLib.addEventListener(CoreRequesterEvent.RESULT, coreRequesterEventHandler);
+				_recorderLib.init(RECORDERLIB_PARAMS);
+			}
+			
+			private function startRecord():void
+			{
+				_coreRequesterParams.refText = txtRefText.text;
+				var recorderParams:Object = 
+					{
+						serverParam:_coreRequesterParams,
+						recordLength:5000 // ms
+					};
+				_recorderLib.startRecord(recorderParams);
+			}
+			
+			private function coreRequesterEventHandler(event:CoreRequesterEvent):void
+			{
+				_scores.removeAll();
+				var details:Array = event.data.result.details;
+				var len:int = details.length;
+				for (var i:int = len - 1; i >=0; i --)
+				{
+					_scores.addItem({Word:details[i].char, Score:details[i].score});
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<!-- the other controls -->
+	<s:HGroup>
+		<s:VGroup width="300">
+			<!-- the other controls -->
+			<s:TextArea id="txtRefText" text="I want to play piano" width='300' height='300' fontSize='30'/>
+			<s:Button label="Start Record" fontSize="36" click="startRecord();"/>
+			<s:Button label="Stop Record" fontSize="36" click="_recorderLib.stopRecord();"/>
+			<s:Button label="Start Replay" fontSize="36" click="_recorderLib.startReplay({});" />
+		</s:VGroup>
+		
+		<!-- score panel -->
+		<s:Panel title='Scores' width='600' height='100%' color="0x000000" borderAlpha="0.15">
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10"/>
+			</s:layout>
+			<mx:BarChart id="scoreBar" height="100%" color="0x323232" showDataTips="true" dataProvider="{_scores}">
+				<mx:verticalAxis>
+					<mx:CategoryAxis categoryField="Word" />
+				</mx:verticalAxis>
+				<mx:horizontalAxis>
+					<mx:LinearAxis maximum="100" minimum="0" />
+				</mx:horizontalAxis> 
+				<mx:series>
+					<mx:BarSeries yField="Word" xField="Score" displayName="Score" />
+				</mx:series>
+			</mx:BarChart>
+		</s:Panel>
+	</s:HGroup>
+</s:Application>
