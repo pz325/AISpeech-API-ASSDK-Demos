@@ -78,6 +78,7 @@
 			{
 				_coreRequesterParams.refText = txtRefText.text;
 				var recordLength:int = 2500 + txtRefText.text.split(" ").length * 450;
+                _playDing = chboxPlayDing.selected;
 				var recorderParams:Object =
 					{
 						serverParam:_coreRequesterParams,
@@ -149,7 +150,7 @@
 		<s:HGroup>
 			<s:Button label="Start Record" fontSize="20" click="startRecord();"/>
 			<s:Button label="Stop Record" fontSize="20" click="stopRecord();"/>
-			<s:CheckBox label="Play 'ding'" id="chboxPlayDing" selected="true" change="_playDing = chboxPlayDing.selected;"/>
+			<s:CheckBox label="Play 'ding'" id="chboxPlayDing" selected="true"/>
 			<s:Button label="Replay the latest" fontSize="20" click="appendReturns(_recorder.startReplay({}));"/>
 		</s:HGroup>
 		<s:HGroup>
