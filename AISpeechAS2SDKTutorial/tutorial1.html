@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"> 
+    <head>
+        <title></title>
+        <meta name="google" value="notranslate" />         
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <!-- load swfobject.js -->
+        <script type="text/javascript" src="com/aispeech/as2/swfobject.js"></script>
+        <!-- load JSBridge -->
+		<script type="text/javascript" src="com/aispeech/as2/AISpeechJSBridge.js"></script>
+		<!-- using swfobject to inject App SWF -->
+        <script type="text/javascript" >
+			var demoSwfUrl = "tutorial1.swf";
+			
+			// For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. 
+			var swfVersionStr = "10.2.0";
+		    // To use express install, set to playerProductInstall.swf, otherwise the empty string. 
+			var xiSwfUrlStr = "com/aispeech/as2/playerProductInstall.swf";
+			var flashvars = {};
+			var params = {};
+			params.quality = "high";
+			params.bgcolor = "#ffffff";
+			params.allowscriptaccess = "always";
+			params.allowfullscreen = "true";
+			params.wmode = "transparent";
+			var attributes = {};
+			attributes.id = "tutorial1";
+			attributes.name = "tutorial1";
+			attributes.align = "middle";
+			attributes.wmode = "transparent";
+			// support IE6+, firefox3.5+, chrome, opera10+ 
+			swfobject.embedSWF(
+				demoSwfUrl,
+				"tutorial1", 
+				"740", "480", 
+				swfVersionStr, xiSwfUrlStr, 
+				flashvars, params, attributes);
+			// JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
+			swfobject.createCSS("#tutorial1", "display:block;text-align:left;");
+
+			// tell JSBridge how to get App SWF instance
+			JSBridge.getAppSWFInstance = function(){
+				return swfobject.getObjectById('tutorial1');
+			};
+        </script>
+    </head>
+    <body>
+		<!-- tutorial1 flash -->
+        <div id="tutorial1" style="width:740px; height:480px;"><p>To view this page ensure that Adobe Flash Player version 10.2.0 or greater is installed.  </p><script type="text/javascript"> var pageHost = ((document.location.protocol == "https:") ? "https://" : "http://"); document.write("<a href='http://www.adobe.com/go/getflashplayer'><img src='" + pageHost + "www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' /></a>" ); </script> </div>
+   </body>
+</html>
