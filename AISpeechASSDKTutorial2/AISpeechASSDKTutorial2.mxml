@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600"
+			   creationComplete="init();">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			/**
+			 * This is the second demo project using AISpeech API ASSDK
+			 * Refer to the online tutorial: 
+    		 * http://blog.aispeech.com/?p=857
+    		 *	
+			 * AI Speech Ltd
+
+			 * @author ping.zou 
+			 * @date 29 Feb 2012
+			 */
+
+			import com.aispeech.RecorderLib;
+			import com.aispeech.events.AIEvent;
+			import com.aispeech.events.CoreRequesterEvent;
+			import com.aispeech.events.FactoryEvent;
+			import com.aispeech.events.MicrophoneDeviceEvent;
+			import com.aispeech.events.NetEvent;
+			import com.aispeech.events.RecorderEvent;
+			
+			import spark.utils.TextFlowUtil;
+			
+			// red, orange, yellow, green
+			private static const COLOUR_ARRAY:Array = ["#FF0000", "#FF6A00", "#FFD800", "#00FF00"];
+			private static const RECORDERLIB_PARAMS:Object = {
+				appKey:"your application ID",
+				secretKey:"your secret Key",
+				serverList:["rtmp://demo.aispeech.com:443/v2.0/aistream"]
+			};
+			private var _coreRequesterParams:Object = {
+				refText:"past", // this to be updated for each core request (record)
+				rank:4,		// we use four-level-scores this time
+				coreType:"en.sent.score",  // request the English-Senetence core 
+				userId:"tutorial2.blog.aispeech.com",
+				applicationId:"your application ID"  // application ID again 	
+			};
+			private var _recorder:RecorderLib;
+			private var _timer:Timer;
+			private var _playDing:Boolean;
+			
+			private function init():void
+			{
+				_recorder = new RecorderLib();
+				_recorder.addEventListener(CoreRequesterEvent.RESULT, coreRequesterEventHandler);
+				// add the other event listeners
+				_recorder.addEventListener(FactoryEvent.READY, eventHandler);
+				_recorder.addEventListener(FactoryEvent.EXCEPTION_TIMEOUT, eventHandler);
+				_recorder.addEventListener(NetEvent.EXCEPTION_CLOSED, eventHandler);
+				_recorder.addEventListener(CoreRequesterEvent.EXCEPTION_PARAMETERS_ERROR, eventHandler);
+				_recorder.addEventListener(CoreRequesterEvent.EXCEPTION_RESPONSE_ERROR, eventHandler);
+				_recorder.addEventListener(CoreRequesterEvent.EXCEPTION_TIMEOUT, eventHandler);
+				_recorder.addEventListener(MicrophoneDeviceEvent.MIC_ALLOWED, eventHandler);
+				_recorder.addEventListener(MicrophoneDeviceEvent.EXCEPTION_MIC_NOT_ALLOWED, eventHandler);
+				_recorder.addEventListener(MicrophoneDeviceEvent.EXCEPTION_MIC_NOT_FOUND, eventHandler);
+				_recorder.addEventListener(RecorderEvent.EXCEPTION_NO_RECORD, eventHandler);
+				_recorder.addEventListener(RecorderEvent.RECORD_STARTED, eventHandler);
+				_recorder.addEventListener(RecorderEvent.RECORD_STOPPED, eventHandler);
+				_recorder.addEventListener(RecorderEvent.RECORDID_GOT, eventHandler);
+				_recorder.addEventListener(RecorderEvent.REPLAY_STARTED, eventHandler);
+				_recorder.addEventListener(RecorderEvent.REPLAY_STOPPED, eventHandler);
+				
+				
+				appendReturns(_recorder.init(RECORDERLIB_PARAMS));
+				
+				_timer = new Timer(2000);
+				_timer.addEventListener(TimerEvent.TIMER, checkStates);
+				_timer.start();
+			}
+			
+			private function startRecord():void
+			{
+				_coreRequesterParams.refText = txtRefText.text;
+				var recordLength:int = 2500 + txtRefText.text.split(" ").length * 450;
+                _playDing = chboxPlayDing.selected;
+				var recorderParams:Object =
+					{
+						serverParam:_coreRequesterParams,
+						recordLength:recordLength, // ms 
+						playDing:_playDing
+					};
+				appendReturns(_recorder.startRecord(recorderParams));
+			}
+			
+			private function stopRecord():void
+			{
+				appendReturns(_recorder.stopRecord());
+			}
+			
+			private function coreRequesterEventHandler(event:CoreRequesterEvent):void
+			{
+				if (event.type == CoreRequesterEvent.RESULT)
+				{
+					// parse results
+					var details:Array = event.data.result.details;
+					var htmlString:String = colourfulScoreHelper(_coreRequesterParams.refText, details);
+					txtScores.textFlow = TextFlowUtil.importFromString(htmlString);
+				}
+			}
+			
+			private function colourfulScoreHelper(refText:String, details:Array):String
+			{
+				var refTextArray:Array = refText.split(" ");
+				var htmlString:String = "";
+				var temp:String = "";
+				for (var i:int = 0; i < refTextArray.length; i ++)
+				{
+					// recall the example: "<span color='#00ff00'>I </span>"
+					temp = "<span color='" +
+						COLOUR_ARRAY[details[i].score - 1] +
+						"'>" + 
+						refTextArray[i] + 
+						" </span>";
+					htmlString += temp;
+				}
+				return htmlString;
+			}
+			
+			private function appendReturns(message:String):void
+			{
+				txtReturns.text += (message + "\n");
+			}
+			
+			private function eventHandler(event:AIEvent):void
+			{
+				appendReturns(event.type);
+			}
+			
+			private function checkStates(event:TimerEvent):void
+			{
+				txtMicrophoneState.text = "Microphone: " + _recorder.microphoneDeviceState;
+				txtRecorderState.text = "Recorder: " + _recorder.recorderState;
+				txtConnectionState.text = "Connection: " + _recorder.connectionState;
+				txtCoreRequesterState.text = "Core requester: " + _recorder.coreRequesterState;
+			}
+			
+		]]>
+	</fx:Script>
+	<s:VGroup>
+		<s:HGroup>
+			<s:Label text="Reference Text"/>
+			<s:TextInput id="txtRefText" text="I like to play piano" fontSize="30" width="627"/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:Button label="Start Record" fontSize="20" click="startRecord();"/>
+			<s:Button label="Stop Record" fontSize="20" click="stopRecord();"/>
+			<s:CheckBox label="Play 'ding'" id="chboxPlayDing" selected="true"/>
+			<s:Button label="Replay the latest" fontSize="20" click="appendReturns(_recorder.startReplay({}));"/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label text="Scores" />
+			<s:TextArea id="txtScores" width="666" height="50" editable="false" fontSize="30" />
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label text="RecorderLib returns and events"/>
+			<s:TextArea id="txtReturns" width="531" height="200"/>
+		</s:HGroup>
+		<s:Label text="RecordLib components states"/>
+		<s:Label text="Microphone: " id="txtMicrophoneState" fontSize="20"/>
+		<s:Label text="Connection: " id="txtConnectionState" fontSize="20"/>
+		<s:Label text="Core requester: " id="txtCoreRequesterState" fontSize="20"/>
+		<s:Label text="Recorder: " id="txtRecorderState" fontSize="20"/>
+	</s:VGroup>
+</s:Application>
