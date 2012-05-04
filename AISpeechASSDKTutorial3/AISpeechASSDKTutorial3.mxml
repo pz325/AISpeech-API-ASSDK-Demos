@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="587" height="314" minWidth="300" minHeight="500"
+			   creationComplete="init();">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+
+			/**
+			 * This is a demo project using AISpeech API ASSDK
+			 * Refer to the online tutorial: 
+    		 * http://blog.aispeech.com/?p=887
+    		 *	
+			 * AI Speech Ltd
+
+			 * @author ping.zou 
+			 * @date 24 Feb 2012
+			 */
+
+			import com.aispeech.RecorderLib;
+			import com.aispeech.events.CoreRequesterEvent;
+			import com.aispeech.events.FactoryEvent;
+			
+			private static const RECORDERLIB_PARAMS:Object = {
+				appKey:"your application ID",
+				secretKey:"your secret key",
+				serverList:["rtmp://demo.aispeech.com:443/v2.0/aistream"]
+			};
+			private var _coreRequesterParams:Object = {
+				refText:"hair|eye|ear|nose|mouth|face|neck", 
+				grammar:"hair|eye|ear|nose|mouth|face|neck", // speech recognition grammar
+				coreType: "en.sent.rec", // request the English speech recognition core
+				language:"english",
+				userId: "tutorial3.blog.aispeech.com",
+				applicationId: "your application ID" // application ID again 
+			};
+			private var _recorder:RecorderLib;
+			
+			private var _lblControls:Object = new Object();
+			
+			private function init():void
+			{
+				_recorder = new RecorderLib();
+				_recorder.addEventListener(CoreRequesterEvent.RESULT, coreRequesterEventHandler);
+				_recorder.addEventListener(FactoryEvent.READY, factoryEventHandler);
+				_recorder.init(RECORDERLIB_PARAMS);
+				
+				// collect all Label visual components
+				for (var i:int = 0; i < this.numElements; i ++)
+				{
+					var x:* = this.getElementAt(i);
+					if (x is Label)
+						_lblControls[Label(x).text] = x;
+				}
+			}
+			
+			private function startRecord():void
+			{
+				btnSpeak.enabled = false;
+				var recordLength:int = 2000;
+				var recorderParams:Object =
+					{
+						serverParam:_coreRequesterParams,
+						recordLength:recordLength // ms 
+					};
+				_recorder.startRecord(recorderParams);
+			}
+			
+			private function factoryEventHandler(event:FactoryEvent):void
+			{
+				btnSpeak.enabled = true;
+			}
+			
+			private function coreRequesterEventHandler(event:CoreRequesterEvent):void
+			{
+				if (event.type == CoreRequesterEvent.RESULT)
+				{
+					var rec:String = event.data.result.rec;
+					_lblControls[rec].visible = true;
+				}
+				btnSpeak.enabled = true;
+			}
+			
+			private function hideAnswers():void
+			{
+				for each (var label:Label in _lblControls)
+				{
+					label.visible = false;
+				}
+			}
+			
+			private function showAnswers():void
+			{
+				for each (var label:Label in _lblControls)
+				{
+					label.visible = true;
+				}
+			}
+		]]>
+	</fx:Script>
+	<s:Image x="134" y="15" source="assets/face.jpg"/>
+	<s:Button id="btnSpeak" x="31" y="10" label="Speak" enabled="false" click="startRecord();"/>
+	<s:Label id="lblHair" visible="false" x="364" y="23" fontSize="20" text="hair"/>
+	<s:Label id="lblEye" visible="false" x="364" y="96" fontSize="20" text="eye"/>
+	<s:Label id="lblEar" visible="false" x="364" y="117" fontSize="20" text="ear"/>
+	<s:Label id="lblNose" visible="false" x="364" y="150" fontSize="20" text="nose"/>
+	<s:Label id="lblFace" visible="false" x="437" y="124" fontSize="20" text="face"/>
+	<s:Label id="lblMouth" visible="false" x="364" y="195" fontSize="20" text="mouth"/>
+	<s:Label id="lblNeck" visible="false" x="364" y="229" fontSize="20" text="neck"/>
+	<s:Button id="btnAnswers" x="31" y="87" label="Answers" click="showAnswers();"/>
+	<s:Button id="btnRestart" x="31" y="121" label="Restart" click="hideAnswers();"/>
+</s:Application>
