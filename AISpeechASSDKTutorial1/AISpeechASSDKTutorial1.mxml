@@ -27,8 +27,7 @@
 			
 			private static const RECORDERLIB_PARAMS:Object = {
 				appKey:"your app ID",
-				secretKey:"you secret key",
-				serverList:["rtmp://demo.aispeech.com:443/v2.0/aistream"]  // release 2.0
+				secretKey:"you secret key"
 			};
 			
 			private var _coreRequesterParams:Object = {
