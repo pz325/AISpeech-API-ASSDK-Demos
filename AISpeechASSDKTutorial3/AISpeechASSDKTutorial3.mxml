@@ -27,8 +27,7 @@
 			
 			private static const RECORDERLIB_PARAMS:Object = {
 				appKey:"your application ID",
-				secretKey:"your secret key",
-				serverList:["rtmp://demo.aispeech.com:443/v2.0/aistream"]
+				secretKey:"your secret key"
 			};
 			private var _coreRequesterParams:Object = {
 				refText:"hair|eye|ear|nose|mouth|face|neck", 
