@@ -1,15 +1,9 @@
 This repository has demo/tutorial projects using AISpeech API ASSDK.
 
 Online tutorials, please refer to
-http://blog.aispeech.com
+http://blog.aispeech.com/?p=919
 
-ASSDK Tutorial 1 http://blog.aispeech.com/?p=832
-ASSDK Tutorial 2 http://blog.aispeech.com/?p=857
-ASSDK Tutorial 3 http://blog.aispeech.com/?p=887
-
-AS2 SDK Tutorial 1 http://blog.aispeech.com/?p=875
-
-Current ASSDK release: AISpeechLib_v2.1.5.r2590
+Current ASSDK release: AISpeechLib_v2.2.0
 
 Applying AISpeech API account: write to api@aispeech.com
 
