@@ -58,6 +58,7 @@
 				_recorderLib.addEventListener(MicrophoneDeviceEvent.MIC_ALLOWED, recorderlibEventHandler);
 				_recorderLib.addEventListener(MicrophoneDeviceEvent.EXCEPTION_MIC_NOT_ALLOWED, recorderlibEventHandler);
 				_recorderLib.addEventListener(MicrophoneDeviceEvent.EXCEPTION_MIC_NOT_FOUND, recorderlibEventHandler);
+				_recorderLib.addEventListener(MicrophoneDeviceEvent.EXCEPTION_MMSCFG_SETTING, recorderlibEventHandler);
 				// RecorderEvent
 				_recorderLib.addEventListener(RecorderEvent.EXCEPTION_NO_RECORD, recorderlibEventHandler);
 				_recorderLib.addEventListener(RecorderEvent.RECORD_STARTED, recorderlibEventHandler);
