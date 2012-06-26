@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600"
+			   creationComplete="init();">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			/**
+			 * This is a demo project using AISpeech API ASSDK
+			 * Refer to the online tutorial: 
+    		 * http://blog.aispeech.com/?p=860
+    		 *	
+			 * AI Speech Ltd
+
+			 * @author ping.zou 
+			 * @date 26 June 2012
+			 */
+			import com.aispeech.RecorderLib;
+			import com.aispeech.events.AIEvent;
+			import com.aispeech.events.CoreRequesterEvent;
+			import com.aispeech.events.FactoryEvent;
+			import com.aispeech.events.MicrophoneDeviceEvent;
+			import com.aispeech.events.NetEvent;
+			import com.aispeech.events.RecorderEvent;
+			
+			private static const REFTEXT:String = "ni2-hao3";
+			private static const CORETYPE:String = "cn.word.score";
+			
+			private var _recorderLib:RecorderLib;
+			
+			// RecorderLib initialisation parameters
+			private static const RECORDERLIB_PARAMS:Object = 
+				{
+					appKey:"your application Id",
+					secretKey:"your secret key"
+				}
+			
+			// Default CoreRequester parameters	
+			private var _coreRequesterParams:Object = 
+				{
+					scoreType:100,
+					rank:100,
+					coreType:CORETYPE,
+					userId:"tutorial5.blog.aispeech.com",
+					applicationId:"your application Id"
+				}
+			
+			/**
+			 * initialise RecorderLib instance
+			 */ 
+			private function init():void {
+				_recorderLib = new RecorderLib();
+				// FactoryEvent
+				_recorderLib.addEventListener(FactoryEvent.READY, recorderlibEventHandler);
+				_recorderLib.addEventListener(FactoryEvent.EXCEPTION_TIMEOUT, recorderlibEventHandler);
+				// NetEvent
+				_recorderLib.addEventListener(NetEvent.EXCEPTION_CLOSED, recorderlibEventHandler);
+				// CoreRequesterEvent
+				_recorderLib.addEventListener(CoreRequesterEvent.RESULT, recorderlibEventHandler);
+				_recorderLib.addEventListener(CoreRequesterEvent.EXCEPTION_PARAMETERS_ERROR, recorderlibEventHandler);
+				_recorderLib.addEventListener(CoreRequesterEvent.EXCEPTION_RESPONSE_ERROR, recorderlibEventHandler);
+				_recorderLib.addEventListener(CoreRequesterEvent.EXCEPTION_TIMEOUT, recorderlibEventHandler);
+				// MicrophoneDeviceEvent
+				_recorderLib.addEventListener(MicrophoneDeviceEvent.MIC_ALLOWED, recorderlibEventHandler);
+				_recorderLib.addEventListener(MicrophoneDeviceEvent.EXCEPTION_MIC_NOT_ALLOWED, recorderlibEventHandler);
+				_recorderLib.addEventListener(MicrophoneDeviceEvent.EXCEPTION_MIC_NOT_FOUND, recorderlibEventHandler);
+				// RecorderEvent
+				_recorderLib.addEventListener(RecorderEvent.EXCEPTION_NO_RECORD, recorderlibEventHandler);
+				_recorderLib.addEventListener(RecorderEvent.RECORD_STARTED, recorderlibEventHandler);
+				_recorderLib.addEventListener(RecorderEvent.RECORD_STOPPED, recorderlibEventHandler);
+				_recorderLib.addEventListener(RecorderEvent.RECORDID_GOT, recorderlibEventHandler);
+				_recorderLib.addEventListener(RecorderEvent.REPLAY_STARTED, recorderlibEventHandler);
+				_recorderLib.addEventListener(RecorderEvent.REPLAY_STOPPED, recorderlibEventHandler);
+				// initialise RecorderLib instance
+				_recorderLib.init(RECORDERLIB_PARAMS);
+				
+				// fill txtRefText TextInput
+				txtRefText.text = REFTEXT;
+			}
+			
+			/**
+			 * RecorderLib event handlers
+			 */
+			private function recorderlibEventHandler(event:AIEvent):void
+			{
+				showLog(event.type);
+				switch(event.type){
+					case FactoryEvent.READY:
+						buttonStartRecord.enabled = true;
+						buttonStopRecord.enabled = true;
+						break;
+					case CoreRequesterEvent.RESULT:
+						parseResult(event.data);
+						break;
+				}
+			}
+			
+			private function startRecord():void {
+				_coreRequesterParams.refText = txtRefText.text;
+				var recorderParams:Object = 
+					{
+						serverParam:_coreRequesterParams,
+						recordLength:5000 // ms
+					};
+				_recorderLib.startRecord(recorderParams);
+			}
+			
+			private function stopRecord():void {
+				_recorderLib.stopRecord();
+			}
+			
+			private function startReplay():void{
+				
+			}
+			
+			private function stopReplay():void {
+				
+			}
+			
+			private function showLog(message:String):void{
+				txtLog.text = txtLog.text + message + "\n";
+			}
+			
+			private function parseResult(result:Object):void
+			{
+				var details:Array = result["result"]["details"];
+				var resultString:String = "";
+				for each (var d:Object in details) 
+				{
+					resultString += "char: " + d["char"] 
+						+ " score: " + d["pron"]
+						+ " tone: " + d["tonescore"]
+						+ "\n";
+				}
+				showLog(resultString);
+			}
+		]]>
+	</fx:Script>
+	<!-- score panel -->
+	<s:VGroup>
+		<s:TextInput id="txtRefText"/>
+		<s:Button id="buttonStartRecord" label="Start Record" click="startRecord();" enabled="false"/>
+		<s:Button id="buttonStopRecord" label="Stop Record" click="stopRecord();" enabled="false"/>
+		<s:Button label="Start Replay" click="startReplay();"/>
+		<s:Button label="Stop Replay" click="stopReplay();"/>
+		<s:TextArea id="txtLog" width="500" height="300"/>
+	</s:VGroup>
+</s:Application>
