@@ -51,6 +51,7 @@
 				_recorderLib.addEventListener(NetEvent.EXCEPTION_CLOSED, recorderlibEventHandler);
 				// CoreRequesterEvent
 				_recorderLib.addEventListener(CoreRequesterEvent.RESULT, recorderlibEventHandler);
+				_recorderLib.addEventListener(CoreRequesterEvent.REQUEST_ID_GOT, recorderlibEventHandler);
 				_recorderLib.addEventListener(CoreRequesterEvent.EXCEPTION_PARAMETERS_ERROR, recorderlibEventHandler);
 				_recorderLib.addEventListener(CoreRequesterEvent.EXCEPTION_RESPONSE_ERROR, recorderlibEventHandler);
 				_recorderLib.addEventListener(CoreRequesterEvent.EXCEPTION_TIMEOUT, recorderlibEventHandler);
